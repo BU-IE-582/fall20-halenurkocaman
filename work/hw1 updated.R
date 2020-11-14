@@ -28,7 +28,7 @@ hg$exp_pois<-dpois(c(0:max(task1$FTHG)),lambda= mean(task1$FTHG))*nrow(task1)
 ggplot(hg, aes(FTHG,obs)) +
   geom_col(binwidth= 1, color="black", fill="plum")+
   geom_line(aes(y=exp_pois))+
-  scale_x_discrete(limits=c(0:max(task1$FTAG)))
+  scale_x_discrete(limits=c(0:max(task1$FTHG)))
 
 
 #Away Goals Histogram 
@@ -44,12 +44,27 @@ ggplot(task1, aes(FTAG)) +
   scale_x_discrete(limits=c(0:max(task1$FTAG)))+
   geom_line(aes(y=dpois(FTAG,lambda= mean(FTAG))), colour="purple")
 
+#Away Goals Histogram with Expected Poisson
+ag<-task1 %>% 
+  group_by(FTAG) %>% 
+  summarise(obs=n())
+
+ag[10,]<-ag[8,]
+ag[8,]<-c(7,0)
+ag[9,]<-c(8,0)
+
+ag$exp_pois<-dpois(c(0:max(task1$FTAG)),lambda= mean(task1$FTAG))*nrow(task1)
+
+ggplot(ag, aes(FTAG,obs)) +
+  geom_col(color="black", fill="lavender")+
+  geom_line(aes(y=exp_pois))+
+  scale_x_discrete(limits=c(0:max(task1$FTAG)))
+
 
 #Home-Away Goals Histogram
 ggplot(task1, aes(HG_AG)) +
   geom_histogram(binwidth= 1, color="black", fill="bisque") +
-  xlab("Home-Away Goals") + ylab("Number of Games")+
-  scale_x_discrete(limits=c(min(task1$HG_AG):max(task1$HG_AG)))
+  xlab("Home-Away Goals") + ylab("Number of Games")
 
 #Calculation
 m<-mean(task1$HG_AG)
@@ -67,7 +82,7 @@ data.frame(colnames(data))
 
 #BET 365
 
-b365<-data[,c(1:8,25:27)]
+b365<-data[,c(1:8,23:27)]
 b365$is_draw<-ifelse(b365$FTR=="D",1,0)
 
 b365$P_home<-1/b365$B365H
@@ -88,7 +103,7 @@ ggplot(b365, aes(ph_pa, P_draw)) +
   ylab("P (Tie)") +  ggtitle("Bet 365")+
   geom_smooth()
 
-b365$p_range<-cut(b365$ph_pa,breaks = seq(-1,1,by=0.05))
+
 
 #b365$p_d_range<-cut(b365$P_draw,breaks = seq(0,1,by=0.02))
 
@@ -111,7 +126,7 @@ b365$p_range<-cut(b365$ph_pa,breaks = seq(-1,1,by=0.05))
 # ggplot(a, aes(p_d_range, draw_real_prob)) +
 #   geom_col()
 
-
+b365$p_range<-cut(b365$ph_pa,breaks = seq(-1,1,by=0.05))
 b<-b365 %>% 
   group_by(p_range) %>% 
   summarise(draw_num=sum(is_draw), obs=n())
@@ -119,9 +134,6 @@ b<-b365 %>%
 b$ort<-seq(-0.825,0.925,by=0.05)
 
 b$draw_real_prob<-b$draw_num/b$obs
-
-ggplot(b, aes(p_range, draw_real_prob)) + 
-  geom_col()
 
 ggplot() + 
   geom_point(data=b365, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=b365, aes(x=ph_pa, y=P_draw))+
@@ -132,7 +144,8 @@ ggplot() +
 
 #BET AND WIN
 
-bw<-data[,c(1:8,28:30)]
+bw<-data[,c(1:8,23:24,28:30)]
+bw$is_draw<-ifelse(bw$FTR=="D",1,0)
 bw$P_home<-1/bw$BWH
 bw$P_draw<-1/bw$BWD
 bw$P_away<-1/bw$BWA
@@ -150,9 +163,26 @@ ggplot(bw, aes(ph_pa, P_draw)) +
   geom_point()+ xlab("P(Home Win) – P(Away Win)") +
   ylab("P (Tie)") + ggtitle("Bet and Win")
 
+bw$p_range<-cut(bw$ph_pa,breaks = seq(-1,1,by=0.05))
+
+bw_df<-bw %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+bw_df$ort<-seq(-0.825,0.925,by=0.05)
+
+bw_df$draw_real_prob<-bw_df$draw_num/bw_df$obs
+
+ggplot() + 
+  geom_point(data=bw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=bw, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=bw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=bw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
+
+
+
 #SOME BOOKMAKER
 
-iw<-data[,c(1:8,31:33)]
+iw<-data[,c(1:8,23:24,31:33)]
+iw$is_draw<-ifelse(iw$FTR=="D",1,0)
 iw$P_home<-1/iw$IWH
 iw$P_draw<-1/iw$IWD
 iw$P_away<-1/iw$IWA
@@ -168,3 +198,70 @@ iw$nph_npa<-iw$NP_home-iw$NP_away
 ggplot(iw, aes(ph_pa, P_draw)) + 
   geom_point()+ xlab("P(Home Win) – P(Away Win)") +
   ylab("P (Tie)") + ggtitle("Some Bookmaker")
+
+iw$p_range<-cut(iw$ph_pa,breaks = seq(-1,1,by=0.05))
+
+iw_df<-iw %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+iw_df$ort<-seq(-0.825,0.925,by=0.05)
+
+iw_df$draw_real_prob<-iw_df$draw_num/iw_df$obs
+
+ggplot() + 
+  geom_point(data=iw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=iw, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=iw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=iw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
+
+#BOOKMAKER 4
+
+
+
+
+
+
+#TASK 3
+#BET 365-remove red cards
+t3_b365<-filter(b365, HR==0 & AR ==0)
+
+t3_b365_df<-t3_b365 %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+t3_b365_df$ort<-seq(-0.825,0.925,by=0.05)
+
+t3_b365_df$draw_real_prob<-t3_b365_df$draw_num/t3_b365_df$obs
+
+ggplot() + 
+  geom_point(data=t3_b365, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_b365, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=t3_b365_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_b365_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
+
+#BET AND WIN-remove red cards
+t3_bw<-filter(bw, HR==0 & AR ==0)
+
+t3_bw_df<-t3_bw %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+t3_bw_df$ort<-seq(-0.825,0.925,by=0.05)
+
+t3_bw_df$draw_real_prob<-t3_bw_df$draw_num/t3_bw_df$obs
+
+ggplot() + 
+  geom_point(data=t3_bw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_bw, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=t3_bw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_bw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
+#SOME BOOKMAKER
+t3_iw<-filter(iw, HR==0 & AR ==0)
+
+t3_iw_df<-t3_iw %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+t3_iw_df$ort<-seq(-0.825,0.925,by=0.05)
+
+t3_iw_df$draw_real_prob<-t3_iw_df$draw_num/t3_iw_df$obs
+
+ggplot() + 
+  geom_point(data=t3_iw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_iw, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=t3_iw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_iw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
+
