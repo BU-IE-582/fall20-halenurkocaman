@@ -103,29 +103,6 @@ ggplot(b365, aes(ph_pa, P_draw)) +
   ylab("P (Tie)") +  ggtitle("Bet 365")+
   geom_smooth()
 
-
-
-#b365$p_d_range<-cut(b365$P_draw,breaks = seq(0,1,by=0.02))
-
-
-# ggplot(b365, aes(p_range)) +
-#   geom_bar(color="black", fill="plum")+
-#   xlab("P(Home Win) – P(Away Win)") + ylab("Number of Games")
-# 
-# 
-# ggplot(b365, aes(p_range,fill=FTR)) +
-#   geom_bar(color="black")+
-#   xlab("P(Home Win) – P(Away Win)") + ylab("Number of Games")
-# 
-# a<-b365 %>%
-#   group_by(p_d_range) %>%
-#   summarise(draw_num=sum(is_draw), obs=n())
-# 
-# a$draw_real_prob<-a$draw_num/a$obs
-# 
-# ggplot(a, aes(p_d_range, draw_real_prob)) +
-#   geom_col()
-
 b365$p_range<-cut(b365$ph_pa,breaks = seq(-1,1,by=0.05))
 b<-b365 %>% 
   group_by(p_range) %>% 
@@ -213,11 +190,40 @@ ggplot() +
   geom_point(data=iw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=iw, aes(x=ph_pa, y=P_draw))+
   geom_point(data=iw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=iw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
 
-#BOOKMAKER 4
+#PINNACLE
+
+ps<-data[,c(1:8,23:24,34:36)]
+ps$is_draw<-ifelse(ps$FTR=="D",1,0)
+ps$P_home<-1/ps$PSH
+ps$P_draw<-1/ps$PSD
+ps$P_away<-1/ps$PSA
+ps$sum_prob<-ps$P_home+ps$P_draw+ps$P_away
+
+ps$NP_home<-ps$P_home/ps$sum_prob
+ps$NP_draw<-ps$P_draw/ps$sum_prob
+ps$NP_away<-ps$P_away/ps$sum_prob
+
+ps$ph_pa<-ps$P_home-ps$P_away
+ps$nph_npa<-ps$NP_home-ps$NP_away
 
 
+ggplot(ps, aes(ph_pa, P_draw)) + 
+  geom_point()+ xlab("P(Home Win) – P(Away Win)") +
+  ylab("P (Tie)") + ggtitle("Pinnacle")
 
+ps$p_range<-cut(ps$ph_pa,breaks = seq(-1,1,by=0.05))
 
+ps_df<-ps %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+ps_df$ort<-seq(-0.825,0.925,by=0.05)
+
+ps_df$draw_real_prob<-ps_df$draw_num/ps_df$obs
+
+ggplot() + 
+  geom_point(data=ps, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=ps, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=ps_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=ps_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
 
 
 #TASK 3
@@ -250,7 +256,8 @@ t3_bw_df$draw_real_prob<-t3_bw_df$draw_num/t3_bw_df$obs
 ggplot() + 
   geom_point(data=t3_bw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_bw, aes(x=ph_pa, y=P_draw))+
   geom_point(data=t3_bw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_bw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
-#SOME BOOKMAKER
+
+#SOME BOOKMAKER-remove red cards
 t3_iw<-filter(iw, HR==0 & AR ==0)
 
 t3_iw_df<-t3_iw %>% 
@@ -265,3 +272,17 @@ ggplot() +
   geom_point(data=t3_iw, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_iw, aes(x=ph_pa, y=P_draw))+
   geom_point(data=t3_iw_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_iw_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
 
+#PINNACLE-remove red cards
+t3_ps<-filter(ps, HR==0 & AR ==0)
+
+t3_ps_df<-t3_ps %>% 
+  group_by(p_range) %>% 
+  summarise(draw_num=sum(is_draw), obs=n())
+
+t3_ps_df$ort<-seq(-0.825,0.925,by=0.05)
+
+t3_ps_df$draw_real_prob<-t3_ps_df$draw_num/t3_ps_df$obs
+
+ggplot() + 
+  geom_point(data=t3_ps, aes(x=ph_pa, y=P_draw))+ geom_smooth(data=t3_ps, aes(x=ph_pa, y=P_draw))+
+  geom_point(data=t3_ps_df,aes(x=ort,y=draw_real_prob,colour="red")) +geom_smooth(data=t3_ps_df,aes(x=ort,y=draw_real_prob,colour="red"),se=FALSE)
