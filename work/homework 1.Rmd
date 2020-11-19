@@ -31,7 +31,9 @@ task1$HG_AG<-task1$FTHG-task1$FTAG
 ```
 
 ###A) Home Score
-As it can be observed from the graphs below, home score goals distribution look like Poisson. 
+
+As it can be observed from the graphs below, home score goals look like having a Poisson distribution. 
+
 ```{r echo=TRUE}
 ggplot(task1, aes(FTHG)) +
   geom_histogram(binwidth= 1, color="black", fill="plum") +
@@ -39,7 +41,7 @@ ggplot(task1, aes(FTHG)) +
   scale_x_discrete(limits=c(0:max(task1$FTHG)))
 ```
 
-To calculate real probablity distribution with the Poisson distribution claim, lambda value is calculated using sample mean of the Home Score goals. According to Poisson distribution, expected number of games for each bin is calculated. Looking at the second graph, the line shows the Poisson distribution values while the bars are showing the real distribution for each goal number. Hence, this graph validates that the home goals distribution shows a Poisson distribution.
+To find real probablity distribution with the Poisson distribution claim, lambda value is calculated using sample mean of the Home Score goals. According to Poisson distribution, expected number of games for each bin is calculated. Looking at the second graph, the line shows the Poisson distribution values while the bars are showing the real distribution for each goal number. Hence, this graph validates that home goals have Poisson distribution.
 
 ```{r echo=TRUE}
 hg<-task1 %>% 
@@ -56,6 +58,7 @@ ggplot(hg, aes(FTHG,obs)) +
 ```
 
 ###B) Away Score
+
 Away score distribution look very similar to home score distribution. It also looks like a Poisson distribution while looking at the graph below.
 
 ```{r echo=FALSE}
@@ -116,7 +119,8 @@ ggplot(task1, aes(HG_AG)) +
 ```
 
 ## TASK 2
-###BET 365
+
+###Bet 365
 
 Firstly, the data containing the basic information about the matches and the odds of Bet 365 are extracted from the data as a new data frame. Then, in order to count the number of draw matches, a binary column named "is_draw" is added. The probabilities for home win, away win and draw are calculated using the 1/odd formula. Then these probabilities are normalized dividing them by sum of all the probabilities. Additionally, the difference between home win probability and away win probability is calculated using two different probability calculation approach.
 
@@ -170,7 +174,7 @@ ggplot() +
   ylab("P(Tie)")+ ggtitle("Bet 365")
 ```
 
-###BET AND WIN 
+###Bet and Win 
 
 The same probability calculations are done for Bet and Win. 
 
@@ -332,10 +336,10 @@ ggplot() +
 
 ##TASK 3
 
-In this part, matches containing red cards are eliminated from the data since they can create noise in the match outcomes. Plots below show the comparison of actual draw probabilities and bookmakers' draw probabilites. When the outliers are eliminated, number of stars ( actual probability) lying above the points( bookmaker's probability) are increased specifically in the area near zero.
+In this part, matches containing red cards are eliminated from the data since they can create noise in the match outcomes. Plots below show the comparison of actual draw probabilities and bookmakers' draw probabilites. When the outliers are eliminated, number of stars (actual probability) lying above the points (bookmaker's probability) are increased specifically in the area near zero.
 
 
-###BET 365
+###Bet 365
 
 ```{r}
 t3_b365<-filter(b365, HR==0 & AR ==0)
@@ -355,7 +359,7 @@ ggplot() +
   ylab("P (Tie)") + ggtitle("Bet 365")
 ```
 
-###BET AND WIN
+###Bet And Win
 
 ```{r}
 t3_bw<-filter(bw, HR==0 & AR ==0)
@@ -375,7 +379,7 @@ ggplot() +
   ylab("P (Tie)") + ggtitle("Bet and Win")
 ```
 
-###SOME BOOKMAKER
+###Some Bookmaker
 
 ```{r}
 t3_iw<-filter(iw, HR==0 & AR ==0)
@@ -397,7 +401,7 @@ ggplot() +
 
 ```
 
-###PINNACLE
+###Pinnacle
 
 ```{r}
 t3_ps<-filter(ps, HR==0 & AR ==0)
