@@ -9,7 +9,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 #Libraries
-```{r include=FALSE}
+
+The libraries used for the homework are as follows:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(readr)
 library(dplyr)
 library(tidyverse)
@@ -31,6 +34,8 @@ colnames(z)[1]<-"class"
 
 
 #TASK 1
+
+First task aims to visualize the position obtained from accelaration information. Then, it will be checked whether they are consistent with the defined class shape or not. According to the 3D scatter plots below, shapes are consistent with the defined classes.
 
 ##Class 1
 
@@ -134,6 +139,8 @@ scatterplot3d(ins_8[,7:9],color="red")
 
 ##Data Preparation
 
+In order to perform task 2, the data is transformed into long format. 
+
 ```{r}
 colnames(x)[2:316]<-c(1:315)
 colnames(y)[2:316]<-c(1:315)
@@ -151,18 +158,21 @@ z_long<-gather(z,key="time index", value= "z",c(3:317))
 df<-cbind(x_long,y=y_long$y,z=z_long$z)
 ```
 
+Before doing PCA, minimum and maximum values of the x,y,z values are checked if scaling is needed. According to the PCA results, first component explains 49% of the variance. Composition of the x,y,z in component 1 can be obtained by loadings below.
+
 ```{r}
 summary(df) #To check if scaling is needed.
 df_pca<-princomp(df[,-c(1:3)])
 summary(df_pca, loadings=T)
 
-new_df<-cbind(df[,c(1:3)],mapping_c1=df_pca$scores[,1]) #Mapping of component 1.
-
-
-
 ```
 
-Visualization of two element in class 1.
+```{r}
+new_df<-cbind(df[,c(1:3)],mapping_c1=df_pca$scores[,1]) #Mapping of component 1.
+head(new_df)
+```
+
+##Visualization of two time series in class 1
 
 ```{r}
 class_1_pca<-filter(new_df,class==1)
@@ -175,7 +185,7 @@ ggplot(class_1_ts)+
    geom_line(aes(x=time_index,y=obs_17),color="blue")
 ```
 
-Visualization of two element in class 2.
+##Visualization of two time series in class 2
 
 ```{r}
 class_2_pca<-filter(new_df,class==2)
@@ -188,7 +198,7 @@ ggplot(class_2_ts)+
    geom_line(aes(x=time_index,y=obs_20),color="blue")
 ```
 
-Visualization of two element in class 3.
+##Visualization of two time series in class 3
 
 ```{r}
 class_3_pca<-filter(new_df,class==3)
@@ -201,7 +211,7 @@ ggplot(class_3_ts)+
    geom_line(aes(x=time_index,y=obs_13),color="blue")
 ```
 
-Visualization of two element in class 4.
+##Visualization of two time series in class 4
 
 ```{r}
 class_4_pca<-filter(new_df,class==4)
@@ -214,7 +224,7 @@ ggplot(class_4_ts)+
    geom_line(aes(x=time_index,y=obs_8),color="blue")
 ```
 
-Visualization of two element in class 5.
+##Visualization of two time series in class 5
 
 ```{r}
 class_5_pca<-filter(new_df,class==5)
@@ -227,7 +237,7 @@ ggplot(class_5_ts)+
    geom_line(aes(x=time_index,y=obs_3),color="blue")
 ```
 
-Visualization of two element in class 6.
+##Visualization of two time series in class 6
 
 ```{r}
 class_6_pca<-filter(new_df,class==6)
@@ -240,7 +250,7 @@ ggplot(class_6_ts)+
    geom_line(aes(x=time_index,y=obs_10),color="blue")
 ```
 
-Visualization of two element in class 7.
+##Visualization of two time series in class 7
 
 ```{r}
 class_7_pca<-filter(new_df,class==7)
@@ -253,7 +263,7 @@ ggplot(class_7_ts)+
    geom_line(aes(x=time_index,y=obs_12),color="blue")
 ```
 
-Visualization of two element in class 8.
+##Visualization of two time series in class 8
 
 ```{r}
 class_8_pca<-filter(new_df,class==8)
@@ -269,7 +279,7 @@ ggplot(class_8_ts)+
 
  #TASK 3
  
-  Class olarak ayýrýnca ilk component ýn varyansý açýklayabilmesi artýyor.
+In task 3, the data is splitted according to class information and principal component analysis is applied for each class separately. According to results, proportion of the variance explained by the fist component has increased.
 
 ```{r}
 class_based_pca<-df %>% split(.$class) %>% map(~princomp(.[,-c(1:3)]))
