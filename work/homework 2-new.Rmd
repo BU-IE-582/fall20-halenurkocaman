@@ -17,6 +17,7 @@ library(readr)
 library(dplyr)
 library(tidyverse)
 library(scatterplot3d)
+library(ggplot2)
 
 ```
 
@@ -182,7 +183,9 @@ class_1_ts<-as.data.frame(cbind(time_index=c(1:315),obs_11=filter(class_1_pca,ob
 
 ggplot(class_1_ts)+
   geom_line(aes(x=time_index,y=obs_11),color="red")+
-   geom_line(aes(x=time_index,y=obs_17),color="blue")
+   geom_line(aes(x=time_index,y=obs_17),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 1")
 ```
 
 ##Visualization of two time series in class 2
@@ -195,7 +198,9 @@ class_2_ts<-as.data.frame(cbind(time_index=c(1:315),obs_15=filter(class_2_pca,ob
 
 ggplot(class_2_ts)+
   geom_line(aes(x=time_index,y=obs_15),color="red")+
-   geom_line(aes(x=time_index,y=obs_20),color="blue")
+   geom_line(aes(x=time_index,y=obs_20),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 2")
 ```
 
 ##Visualization of two time series in class 3
@@ -208,7 +213,9 @@ class_3_ts<-as.data.frame(cbind(time_index=c(1:315),obs_4=filter(class_3_pca,obs
 
 ggplot(class_3_ts)+
   geom_line(aes(x=time_index,y=obs_4),color="red")+
-   geom_line(aes(x=time_index,y=obs_13),color="blue")
+   geom_line(aes(x=time_index,y=obs_13),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 3")
 ```
 
 ##Visualization of two time series in class 4
@@ -221,7 +228,9 @@ class_4_ts<-as.data.frame(cbind(time_index=c(1:315),obs_5=filter(class_4_pca,obs
 
 ggplot(class_4_ts)+
   geom_line(aes(x=time_index,y=obs_5),color="red")+
-   geom_line(aes(x=time_index,y=obs_8),color="blue")
+   geom_line(aes(x=time_index,y=obs_8),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 4")
 ```
 
 ##Visualization of two time series in class 5
@@ -234,7 +243,9 @@ class_5_ts<-as.data.frame(cbind(time_index=c(1:315),obs_2=filter(class_5_pca,obs
 
 ggplot(class_5_ts)+
   geom_line(aes(x=time_index,y=obs_2),color="red")+
-   geom_line(aes(x=time_index,y=obs_3),color="blue")
+   geom_line(aes(x=time_index,y=obs_3),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 5")
 ```
 
 ##Visualization of two time series in class 6
@@ -247,7 +258,9 @@ class_6_ts<-as.data.frame(cbind(time_index=c(1:315),obs_1=filter(class_6_pca,obs
 
 ggplot(class_6_ts)+
   geom_line(aes(x=time_index,y=obs_1),color="red")+
-   geom_line(aes(x=time_index,y=obs_10),color="blue")
+   geom_line(aes(x=time_index,y=obs_10),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 6")
 ```
 
 ##Visualization of two time series in class 7
@@ -260,7 +273,9 @@ class_7_ts<-as.data.frame(cbind(time_index=c(1:315),obs_7=filter(class_7_pca,obs
 
 ggplot(class_7_ts)+
   geom_line(aes(x=time_index,y=obs_7),color="red")+
-   geom_line(aes(x=time_index,y=obs_12),color="blue")
+   geom_line(aes(x=time_index,y=obs_12),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 7")
 ```
 
 ##Visualization of two time series in class 8
@@ -273,7 +288,9 @@ class_8_ts<-as.data.frame(cbind(time_index=c(1:315),obs_6=filter(class_8_pca,obs
 
 ggplot(class_8_ts)+
   geom_line(aes(x=time_index,y=obs_6),color="red")+
-   geom_line(aes(x=time_index,y=obs_21),color="blue")
+   geom_line(aes(x=time_index,y=obs_21),color="blue")+
+  xlab("Time")+ ylab("Component 1 Mapping")+
+  ggtitle("Class 8")
 ```
 
 
@@ -284,6 +301,26 @@ In task 3, the data is splitted according to class information and principal com
 ```{r}
 class_based_pca<-df %>% split(.$class) %>% map(~princomp(.[,-c(1:3)]))
 map(class_based_pca,summary)
+```
+ 
+ #TASK 4-Deneme
+ 
+```{r}
+t4<-cbind(x[,-c(1:2)],y[,-c(1:2)],z[,-c(1:2)])
+t4_m<-as.matrix(t4)
+dist_mat<-as.matrix(dist(t4_m, method = "euclidean"))
+mds_fit <- as.data.frame(cmdscale(dist_mat,eig=TRUE, k=2)$points[,c(1:2)]) # k is the number of dim
+mds<-as.data.frame(cbind(class=x$class,comp_1=mds_fit$V1,comp_2=mds_fit$V2))
+mds$class<-as.factor(mds$class)
+
+cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+          "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+ggplot(mds)+
+  geom_point(aes(x=comp_1,y=comp_2,color=class))+
+  scale_color_manual(values=cbp1)+
+  xlab("First Component")+
+  ylab("Second Component")
 ```
  
  
