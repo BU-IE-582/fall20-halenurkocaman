@@ -7,3 +7,7 @@
 ## Homework 1 (November 19)
 
 [Here](files\homework-1.html) is my first homework.
+
+## Homework 2 (December 11)
+
+[Here](files\homework-2.html) is my second homework.
