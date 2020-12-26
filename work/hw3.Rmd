@@ -1,0 +1,101 @@
+---
+title: "Homework 3"
+author: "Halenur Kocaman"
+date: "25 Aralýk 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Libraries
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+
+##Reading the Data
+```{r}
+df<-read.csv("C:/Users/asus/Desktop/elektrik.csv")
+df<-df %>% rename(consumption = Tüketim.Miktarý..MWh.)
+head(df[with(df, order("Tarih", "Saat"))])
+index<-c(1:nrow(df))
+df<-cbind(index=index,df)
+
+#plot(df$index[c(1:100)],df$consumption[c(1:100)])
+```
+
+```{r}
+str(df)
+df$consumption<-as.numeric(df$consumption)
+df$lagged_48<-lag(df$consumption,48)
+df$lagged_168<-lag(df$consumption,168)
+test_df<-df[-c(1:42385),]
+train_df<-df[c(1:42385),][-c(1:168),]
+```
+```{r}
+boxplot(df$consumption)
+
+#lag 168 naive
+fit_48<-lm(consumption~lagged_48,data=train_df)
+summary(fit_48)
+prediction_48<-predict(fit_48,test_df[,5:6])
+plot(test_df$consumption,prediction_48)
+abline(a=0,b=1,col=2)
+mape_48<-mean(abs(prediction_48/test_df$consumption))
+mape_48
+
+#lag 48 naive 
+fit_168<-lm(consumption~lagged_168,data=train_df)
+summary(fit_168)
+prediction_168<-predict(fit_168,test_df[,5:6])
+plot(test_df$consumption,prediction_168)
+abline(a=0,b=1,col=2)
+mape_168<-mean(abs(prediction_168/test_df$consumption))
+mape_168
+
+mape_scores<-cbind(model_lag_168=mape_168,model_lag_48=mape_48)
+mape_scores
+```
+
+##Task 1
+```{r}
+plot(test_df$consumption,test_df$lagged_48)
+abline(a=0,b=1,col=2)
+mape_48<-mean(abs(test_df$lagged_48/test_df$consumption))
+
+plot(test_df$consumption,test_df$lagged_168)
+abline(a=0,b=1,col=2)
+mape_168<-mean(abs(test_df$lagged_168/test_df$consumption))
+
+mape_scores<-cbind(naive_lag_168=mape_168,naive_lag_48=mape_48)
+mape_scores
+```
+
+```{r}
+fit<-lm(consumption~lagged_48+lagged_168,data=train_df)
+summary(fit)
+prediction<-predict(fit,test_df[,5:6])
+plot(test_df$consumption,prediction)
+abline(a=0,b=1,col=2)
+
+mape_reg<-mean(abs(prediction/test_df$consumption))
+
+mape_scores_2<-cbind(mape_scores,mape_reg)
+mape_scores_2
+```
+
+```{r}
+hourly_model<-train_df %>% split(.$Saat) %>% map(~lm(consumption~lagged_48+lagged_168, data=.))
+map(hourly_model,summary)
+hourly_model[1]
+
+```
+
+
+
+
