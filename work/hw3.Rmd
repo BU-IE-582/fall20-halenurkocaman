@@ -91,8 +91,11 @@ mape_scores_2
 
 ```{r}
 hourly_model<-train_df %>% split(.$Saat) %>% map(~lm(consumption~lagged_48+lagged_168, data=.))
-map(hourly_model,summary)
-hourly_model[1]
+a<-test_df %>% split(.$Saat)
+
+```
+
+```{r}
 
 ```
 
