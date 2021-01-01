@@ -11,3 +11,7 @@
 ## Homework 2 (December 11)
 
 [Here](files\homework-2.html) is my second homework.
+
+## Homework 3 (January 1)
+
+[Here](files\homework-3.html) is my third homework.
