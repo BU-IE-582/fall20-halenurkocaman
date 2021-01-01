@@ -313,7 +313,7 @@ ggplot(class_8_ts)+
 In task 3, the data is splitted according to class information and principal component analysis is applied for each class separately. According to results, proportion of the variance explained by the fist component has increased. It is because we have already reduce the noise coming from the difference in class differences.
 
 ```{r}
-class_based_pca<-df %>% split(.$class) %>% map(~princomp(.[,-c(1:3)]))
+class_based_pca<-df %>% split(.$class) %>% map(~lm(mpg~wt, data=.))
 map(class_based_pca,summary)
 ```
  
