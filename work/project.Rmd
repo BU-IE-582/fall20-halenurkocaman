@@ -1,0 +1,56 @@
+---
+title: "Project"
+author: "Halenur Kocaman"
+date: "15 Ocak 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(glmnet)
+library(ROCR)
+install.packages("D2C")
+library("D2C")
+require("D2C")
+```
+
+```{r}
+train<-read.csv("C:/Users/asus/Desktop/train.csv")
+test<-read.csv("C:/Users/asus/Desktop/train.csv")
+```
+
+
+##Logistic Regression
+```{r}
+summary(train) #1,5,6,7,8,9,10,11,14,30,36 numeric ve scale leri farklý.
+str(t)
+train_mat=as.matrix(train[,-61])
+test_mat=as.matrix(test[,-61])
+cvfit=cv.glmnet(train_mat,train$y,family='binomial',type.measure='class',standardize=TRUE)
+plot(cvfit)
+coef(cvfit,s="lambda.1se")
+predicted=predict(cvfit,test_mat,s='lambda.1se',type='class')
+head(predicted)
+predicted_2<-predict(cvfit,test_mat,s='lambda.1se',type='response')
+
+tab<-table(predicted[,1],test$y)
+tab
+test_error<-1-sum(diag(tab)/sum(tab))
+print(test_error)
+
+model1_ROC<-prediction(predicted_2,test$y)
+perf=performance(model1_ROC,"tpr","fpr")
+plot(perf)
+
+#BER = 0.5*(FP/(TN+FP) + FN/(FN+TP))
+
+```
+
+
+
