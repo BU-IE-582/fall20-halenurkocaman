@@ -15,6 +15,14 @@ library(tidyverse)
 library(dplyr)
 library(glmnet)
 library(ROCR)
+install.packages("vip")
+library(vip)
+library(caret)
+library(tibble)
+library(rpart)
+library(rpart.plot)
+install.packages("rlang")
+library(rlang)
 install.packages("D2C")
 library("D2C")
 require("D2C")
@@ -23,6 +31,16 @@ require("D2C")
 ```{r}
 train<-read.csv("C:/Users/asus/Desktop/train.csv")
 test<-read.csv("C:/Users/asus/Desktop/train.csv")
+```
+
+```{r}
+elim<-nearZeroVar(train, saveMetrics = TRUE) %>% 
+  rownames_to_column() %>% 
+  filter(nzv)
+cols<-as.vector(elim[,1])
+cols
+train_1<-select(train ,-c(x13, x18,x19, x20, x21,x22,x26,x29,x31,x33,x36,x37,x42, x43,x46,x49,x50,x52,x55,x57,x59,x60))
+test_1<-select(test ,-c(x13, x18,x19, x20, x21,x22,x26,x29,x31,x33,x36,x37,x42, x43,x46,x49,x50,x52,x55,x57,x59,x60))
 ```
 
 
@@ -34,10 +52,9 @@ train_mat=as.matrix(train[,-61])
 test_mat=as.matrix(test[,-61])
 cvfit=cv.glmnet(train_mat,train$y,family='binomial',type.measure='class',standardize=TRUE)
 plot(cvfit)
-coef(cvfit,s="lambda.1se")
-predicted=predict(cvfit,test_mat,s='lambda.1se',type='class')
+coef(cvfit,s="lambda.min")
+predicted=predict(cvfit,test_mat,s='lambda.min',type='class')
 head(predicted)
-predicted_2<-predict(cvfit,test_mat,s='lambda.1se',type='response')
 
 tab<-table(predicted[,1],test$y)
 tab
@@ -52,5 +69,44 @@ plot(perf)
 
 ```
 
+```{r}
+train_mat_1=as.matrix(train_1[,-39])
+test_mat_1=as.matrix(test_1[,-39])
+cvfit_1=cv.glmnet(train_mat_1,train_1$y,family='binomial',type.measure='class',standardize=TRUE)
+plot(cvfit_1)
+coef(cvfit_1,s="lambda.min")
+predicted_1=predict(cvfit_1,test_mat_1,s='lambda.min',type='class')
+head(predicted_1)
 
+tab_1<-table(predicted_1[,1],test_1$y)
+tab_1
+test_error_1<-1-sum(diag(tab_1)/sum(tab_1))
+print(test_error_1)
+```
+
+
+```{r}
+tune.gridcart <- expand.grid(
+  cp = c(0.01,0.015,0.02)
+  )
+tune_control=trainControl(
+  method = "cv", # cross-validation
+  number = 5, # with n folds 
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE)
+dt_1 <- train(
+  y ~ .,
+  data = train_1,
+  method = "rpart",
+  trControl = tune_control,
+  tuneGrid = tune.gridcart,
+  metric= "ROC"
+)
+dt_1
+dt_1$bestTune
+vip(dt_1)
+# Construct partial dependence plots
+p1 <- partial(dt_1, pred.var = "x30") %>% autoplot()
+
+```
 
