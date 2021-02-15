@@ -22,4 +22,5 @@
 
 ## Project (February 15)
 
-[Here](files\final-project.html) is my group project.
+[Here](files\final-project.html) is my group project code.
+[Here](files\IE582-FinalProject.pdf) is my group project report.
